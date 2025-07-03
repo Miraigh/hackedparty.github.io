@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днём Рождения, Kate!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            overflow: hidden;
+            background-color: #000;
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        /* Начальный экран - хакерский стиль */
+        .matrix-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            color: #0f0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .access-panel {
+            background-color: rgba(0, 20, 0, 0.7);
+            border: 1px solid #0f0;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), 
+                        0 0 40px rgba(0, 100, 0, 0.2),
+                        inset 0 0 15px rgba(0, 200, 0, 0.4);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: panel-appear 1.5s forwards 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes panel-appear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .access-panel h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0f0;
+            letter-spacing: 3px;
+            color: #0f0;
+        }
+
+        .access-panel p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #4f4;
+        }
+
+        .input-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .access-input {
+            background: rgba(0, 15, 0, 0.8);
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 12px 20px;
+            width: 100%;
+            font-size: 1.2rem;
+            font-family: 'Source Code Pro', monospace;
+            letter-spacing: 2px;
+            outline: none;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0, 100, 0, 0.5);
+            transition: all 0.3s;
+        }
+
+        .access-input:focus {
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5),
+                        inset 0 0 15px rgba(0, 150, 0, 0.7);
+            border-color: #0f8;
+        }
+
+        .submit-btn {
+            background: rgba(0, 30, 0, 0.6);
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-family: 'Source Code Pro', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            margin-top: 10px;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            background: rgba(0, 40, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            text-shadow: 0 0 8px #0f0;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .warning {
+            color: #f44;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            min-height: 20px;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            letter-spacing: 1px;
+            height: 24px;
+        }
+
+        /* Стили для анимации терминала */
+        .terminal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #0f0;
+            font-family: 'Source Code Pro', monospace;
+            padding: 20px;
+            overflow: auto;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .terminal-line {
+            margin-bottom: 10px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+
+        .terminal-prompt {
+            color: #0f0;
+            display: inline-block;
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #0f0;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        .terminal-command {
+            display: inline;
+            position: relative;
+        }
+
+        .terminal-command::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -1px;
+            width: 2px;
+            height: 100%;
+            background: #0f0;
+            animation: typing-cursor 0.7s infinite;
+        }
+
+        .user-input {
+            color: #0ff;
+        }
+
+        .system-response {
+            color: #ff0;
+        }
+
+        .success {
+            color: #0f8;
+        }
+
+        .critical {
+            color: #f00;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Обратный отсчет */
+        .countdown {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 30;
+            justify-content: center;
+            align-items: center;
+            font-size: 25vw;
+            color: #f00;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            opacity: 0;
+            transition: opacity 0.8s;
+        }
+
+        .countdown-number {
+            animation: countdownPulse 0.5s ease-out;
+        }
+
+        /* Праздничный экран */
+        .celebration {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('background.png') no-repeat center center;
+            background-size: cover;
+            z-index: 40;
+            opacity: 0;
+            overflow: hidden;
+            transition: opacity 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .birthday-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(255, 255, 255, 0.92);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 650px;
+            z-index: 50;
+            border: 5px solid #ff6b6b;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .birthday-card.appear {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .birthday-card h1 {
+            font-size: 3.8rem;
+            color: #ff6b6b;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .birthday-card p {
+            font-size: 1.9rem;
+            color: #5a67d8;
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .signature {
+            font-style: italic;
+            font-size: 1.7rem;
+            color: #333;
+            margin-top: 30px;
+            font-weight: 600;
+        }
+
+        .flying-image {
+            position: absolute;
+            z-index: 55; /* Выше карточки */
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6));
+            max-width: 130px;
+            max-height: 130px;
+            opacity: 0.9;
+            transform: translate(-50%, -50%);
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        /* Анимации */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes typing-cursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes countdownPulse {
+            0% { 
+                transform: scale(1);
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            }
+            50% { 
+                transform: scale(1.2);
+                text-shadow: 0 0 40px rgba(255, 0, 0, 1);
+            }
+            100% { 
+                transform: scale(1);
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        @keyframes countdownVibrate {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-3px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Начальный экран - матрица -->
+    <div class="matrix-container" id="matrixScreen">
+        <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+        <div class="access-panel">
+            <h1>СИСТЕМА БЕЗОПАСНОСТИ</h1>
+            <p>ВНИМАНИЕ: Обнаружена попытка несанкционированного доступа. Для продолжения введите кодовое слово.</p>
+            <div class="input-container">
+                <input type="text" class="access-input" id="codeInput" placeholder="ВВЕДИТЕ КОДОВОЕ СЛОВО..." autocomplete="off">
+                <div class="warning" id="warningText"></div>
+            </div>
+            <button class="submit-btn" id="submitBtn">ПОДТВЕРДИТЬ</button>
+        </div>
+    </div>
+
+    <!-- Анимация терминала -->
+    <div class="terminal" id="terminal">
+        <div id="terminalContent"></div>
+        <div class="terminal-line" id="terminalCursorLine">
+            <span class="terminal-prompt">root@system:~# </span>
+            <span id="typingCommand"></span>
+            <span class="terminal-cursor" id="terminalCursor"></span>
+        </div>
+    </div>
+
+    <!-- Обратный отсчет -->
+    <div class="countdown" id="countdown">5</div>
+
+    <!-- Праздничный экран -->
+    <div class="celebration" id="celebration">
+        <div class="birthday-card" id="birthdayCard">
+            <h1>С ДНЁМ РОЖДЕНИЯ, KATЯ!</h1>
+            <p>Сегодня твой день и ты медленно приближаешься к смерти! >=DD</p>
+            <p>Желаю здоровья и чтобы сегодня тебе подарили как можно больше денег и мяса!</p>
+            <p class="signature">- Apple Jack, Zhongli, Jesse, Rhys, Akali, Clementine, Razputin</p>
+        </div>
+    </div>
+
+    <!-- Аудио элементы -->
+    <audio id="hackingAudio" loop>
+        <source src="1.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="celebrationAudio" loop>
+        <source src="2.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="countdownAudio">
+        <source src="data:audio/wav;base64,UklGRigEAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAEAADoAQD/AQACAAEA/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AA==" type="audio/wav">
+    </audio>
+
+    <script>
+        // Инициализация эффекта матрицы
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?/~';
+        
+        const chars = katakana + latin + nums + symbols;
+        
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = `${fontSize}px monospace`;
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        const matrixInterval = setInterval(drawMatrix, 33);
+        
+        // Аудио элементы
+        const hackingAudio = document.getElementById('hackingAudio');
+        const celebrationAudio = document.getElementById('celebrationAudio');
+        const countdownAudio = document.getElementById('countdownAudio');
+        
+        // Настройка громкости
+        hackingAudio.volume = 0.1; // 10% громкость
+        celebrationAudio.volume = 0.1; // 10% громкость
+        countdownAudio.volume = 1; // 100% громкость для отсчёта
+        
+        // Обработка ввода кодового слова
+        const codeInput = document.getElementById('codeInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const warningText = document.getElementById('warningText');
+        const matrixScreen = document.getElementById('matrixScreen');
+        const terminal = document.getElementById('terminal');
+        const terminalContent = document.getElementById('terminalContent');
+        const terminalCursorLine = document.getElementById('terminalCursorLine');
+        const terminalCursor = document.getElementById('terminalCursor');
+        const countdown = document.getElementById('countdown');
+        const celebration = document.getElementById('celebration');
+        const birthdayCard = document.getElementById('birthdayCard');
+        
+        // Реалистичные хакерские команды
+        const hackingCommands = [
+            {command: "sudo nmap -sS -T4 -A -v 192.168.1.0/24", type: "system", delay: 30},
+            {command: "Starting Nmap 7.80 ( https://nmap.org )", type: "response", delay: 0},
+            {command: "Discovered open port 80/tcp on 192.168.1.5", type: "response", delay: 0},
+            {command: "hydra -l admin -P passlist.txt ssh://192.168.1.5", type: "system", delay: 40},
+            {command: "[22][ssh] host: 192.168.1.5   login: admin   password: K@t3P@ss", type: "success", delay: 0},
+            {command: "ssh admin@192.168.1.5", type: "user", delay: 30},
+            {command: "admin@192.168.1.5's password: ********", type: "response", delay: 0},
+            {command: "Welcome to Ubuntu 20.04.3 LTS", type: "response", delay: 0},
+            {command: "sudo -i", type: "user", delay: 30},
+            {command: "root@target:~# whoami", type: "user", delay: 30},
+            {command: "root", type: "success", delay: 0},
+            {command: "cat /etc/passwd | grep home", type: "user", delay: 40},
+            {command: "kate:x:1000:1000:Kate,,,:/home/kate:/bin/bash", type: "response", delay: 0},
+            {command: "grep 'bday' /home/kate/documents/notes.txt", type: "user", delay: 50},
+            {command: "BIRTHDAY: 16.09.2025", type: "critical", delay: 0},
+            {command: "alert! special event detected: BIRTHDAY", type: "critical", delay: 0},
+            {command: "initiate celebration_protocol.sh", type: "user", delay: 40},
+            {command: "Executing celebration protocol...", type: "system", delay: 0},
+            {command: "Downloading birthday_module...", type: "system", delay: 0},
+            {command: "Injecting joy.exe into system...", type: "system", delay: 0},
+            {command: "Activating party_mode...", type: "system", delay: 0},
+            {command: "Connection established. Happy birthday, Kate!", type: "success", delay: 0}
+        ];
+        
+        function checkCode() {
+            const input = codeInput.value.trim();
+            
+            if (input.toLowerCase() === 'kate') {
+                // Правильный код
+                warningText.textContent = '';
+                
+                // Запуск хакерской музыки
+                hackingAudio.play().catch(e => console.log("Audio play error:", e));
+                
+                startHackingAnimation();
+            } else {
+                // Неправильный код
+                warningText.textContent = 'ОШИБКА: Неверное кодовое слово. Попробуйте снова.';
+                codeInput.classList.add('shake');
+                setTimeout(() => {
+                    codeInput.classList.remove('shake');
+                }, 500);
+                
+                // Анимация ошибки
+                codeInput.style.borderColor = '#f00';
+                codeInput.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.5)';
+                setTimeout(() => {
+                    codeInput.style.borderColor = '#0f0';
+                    codeInput.style.boxShadow = '';
+                }, 1000);
+            }
+        }
+        
+        submitBtn.addEventListener('click', checkCode);
+        codeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkCode();
+            }
+        });
+        
+        // Запуск анимации взлома
+        function startHackingAnimation() {
+            matrixScreen.style.opacity = '0';
+            matrixScreen.style.transform = 'scale(1.1)';
+            
+            setTimeout(() => {
+                matrixScreen.style.display = 'none';
+                terminal.style.display = 'block';
+                
+                setTimeout(() => {
+                    terminal.style.opacity = '1';
+                    simulateTerminal();
+                }, 300);
+            }, 1200);
+        }
+        
+        // Симуляция терминала с анимацией печати
+        function simulateTerminal() {
+            let commandIndex = 0;
+            
+            function processNextCommand() {
+                if (commandIndex < hackingCommands.length) {
+                    const cmd = hackingCommands[commandIndex];
+                    
+                    if (cmd.type === "user" || cmd.type === "system") {
+                        // Анимация печати команды
+                        printCommand(cmd, () => {
+                            // После завершения печати команды
+                            addSystemResponse(cmd);
+                            
+                            // Скрываем курсор после завершения команды
+                            terminalCursor.style.display = 'none';
+                            
+                            commandIndex++;
+                            setTimeout(processNextCommand, 500);
+                        });
+                    } else {
+                        // Ответ системы без анимации печати
+                        addSystemResponse(cmd);
+                        commandIndex++;
+                        setTimeout(processNextCommand, 800);
+                    }
+                } else {
+                    // Завершение анимации терминала
+                    setTimeout(() => {
+                        // Полностью скрываем строку с курсором
+                        terminalCursorLine.style.display = 'none';
+                        
+                        // Останавливаем хакерскую музыку
+                        hackingAudio.pause();
+                        
+                        terminal.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            terminal.style.display = 'none';
+                            startCountdown();
+                        }, 800);
+                    }, 1500);
+                }
+            }
+            
+            processNextCommand();
+        }
+        
+        // Анимация печати команды
+        function printCommand(cmd, callback) {
+            const promptLine = document.createElement('div');
+            promptLine.className = 'terminal-line';
+            terminalContent.appendChild(promptLine);
+            
+            const promptSpan = document.createElement('span');
+            promptSpan.className = 'terminal-prompt';
+            promptSpan.textContent = 'root@system:~# ';
+            promptLine.appendChild(promptSpan);
+            
+            const commandSpan = document.createElement('span');
+            commandSpan.className = `terminal-command ${cmd.type === 'user' ? 'user-input' : 'system'}`;
+            promptLine.appendChild(commandSpan);
+            
+            // Показываем курсор для текущей команды
+            terminalCursor.style.display = 'inline-block';
+            
+            let charIndex = 0;
+            const commandText = cmd.command;
+            
+            function typeNextChar() {
+                if (charIndex < commandText.length) {
+                    commandSpan.textContent += commandText.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeNextChar, cmd.delay);
+                } else {
+                    // Скрываем курсор после завершения команды
+                    terminalCursor.style.display = 'none';
+                    
+                    if (callback) callback();
+                }
+            }
+            
+            typeNextChar();
+            
+            // Прокрутка вниз
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Добавление ответа системы
+        function addSystemResponse(cmd) {
+            const responseLine = document.createElement('div');
+            responseLine.className = 'terminal-line';
+            
+            let responseClass = '';
+            if (cmd.type === 'success') responseClass = 'success';
+            else if (cmd.type === 'critical') responseClass = 'critical';
+            else if (cmd.type === 'response') responseClass = 'system-response';
+            
+            responseLine.innerHTML = `<span class="${responseClass}">${cmd.command}</span>`;
+            terminalContent.appendChild(responseLine);
+            
+            // Прокрутка вниз
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Обратный отсчет
+        function startCountdown() {
+            countdown.style.display = 'flex';
+            setTimeout(() => {
+                countdown.style.opacity = '1';
+                let count = 5;
+                
+                // Воспроизводим звук для первой цифры
+                countdownAudio.currentTime = 0;
+                countdownAudio.play().catch(e => console.log("Countdown audio error:", e));
+                
+                const countdownInterval = setInterval(() => {
+                    countdown.textContent = count;
+                    countdown.classList.add('countdown-number');
+                    
+                    // Добавляем эффект вибрации для цифр
+                    countdown.style.animation = 'countdownVibrate 0.3s';
+                    setTimeout(() => {
+                        countdown.style.animation = '';
+                    }, 300);
+                    
+                    // Воспроизводим звук для каждой цифры
+                    if (count > 0) {
+                        countdownAudio.currentTime = 0;
+                        countdownAudio.play().catch(e => console.log("Countdown audio error:", e));
+                    }
+                    
+                    count--;
+                    
+                    if (count < 0) {
+                        clearInterval(countdownInterval);
+                        countdown.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            countdown.style.display = 'none';
+                            
+                            // Запуск праздничной музыки
+                            celebrationAudio.play().catch(e => console.log("Celebration audio error:", e));
+                            
+                            startCelebration();
+                        }, 1000);
+                    }
+                }, 1000);
+            }, 300);
+        }
+        
+        // Запуск праздничного экрана
+        function startCelebration() {
+            celebration.style.display = 'block';
+            
+            setTimeout(() => {
+                celebration.style.opacity = '1';
+                
+                // Создаем летающие картинки
+                createFlyingImages();
+                
+                // Анимация карточки
+                setTimeout(() => {
+                    birthdayCard.classList.add('appear');
+                }, 300);
+            }, 300);
+        }
+        
+        // Создание летающих картинок (8 штук)
+        function createFlyingImages() {
+            const imageCount = 8; // 1.png до 8.png
+            const usedPaths = new Set();
+            
+            for (let i = 0; i < imageCount; i++) {
+                const img = document.createElement('img');
+                img.className = 'flying-image';
+                img.src = `${i+1}.png`;
+                img.alt = `Celebration image ${i+1}`;
+                
+                // Размеры
+                const size = 70 + Math.random() * 60;
+                img.style.width = `${size}px`;
+                img.style.height = `${size}px`;
+                
+                // Начальная позиция в пределах видимой области
+                const startTop = 10 + Math.random() * 80;
+                const startLeft = 10 + Math.random() * 80;
+                img.style.top = `${startTop}%`;
+                img.style.left = `${startLeft}%`;
+                
+                // Случайная траектория
+                const path = generateRandomPath();
+                img.style.animationName = path.name;
+                img.style.animationDuration = `${15 + Math.random() * 15}s`;
+                img.style.animationDelay = `${Math.random() * 5}s`;
+                
+                celebration.appendChild(img);
+            }
+        }
+        
+        // Генерация уникальной случайной траектории
+        function generateRandomPath() {
+            // Случайные точки для траектории
+            const points = [];
+            for (let i = 0; i < 4; i++) {
+                points.push({
+                    top: 10 + Math.random() * 80,
+                    left: 10 + Math.random() * 80
+                });
+            }
+            
+            // Создаем уникальное имя для анимации
+            const animationName = `flyPath${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            
+            // Создаем keyframes
+            const keyframes = `
+                @keyframes ${animationName} {
+                    0% {
+                        top: ${points[0].top}%;
+                        left: ${points[0].left}%;
+                    }
+                    33% {
+                        top: ${points[1].top}%;
+                        left: ${points[1].left}%;
+                    }
+                    66% {
+                        top: ${points[2].top}%;
+                        left: ${points[2].left}%;
+                    }
+                    100% {
+                        top: ${points[3].top}%;
+                        left: ${points[3].left}%;
+                    }
+                }
+            `;
+            
+            // Добавляем в стили
+            const style = document.createElement('style');
+            style.innerHTML = keyframes;
+            document.head.appendChild(style);
+            
+            return { name: animationName };
+        }
+        
+        // Адаптация к изменению размера окна
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Фокус на поле ввода при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                codeInput.focus();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
